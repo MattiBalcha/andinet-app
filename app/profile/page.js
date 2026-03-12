@@ -17,8 +17,20 @@ export default function Profile() {
         background: 'linear-gradient(160deg, #6B0F0F, #8B1A1A, #4A0A0A)',
         position: 'relative', flexShrink: 0
       }}>
+        {/* Status bar */}
         <div style={{
-          position: 'absolute', top: 44, right: 16,
+          position: 'absolute', top: 0, left: 0, right: 0,
+          height: 44, display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', padding: '0 28px',
+          color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 700
+        }}>
+          <span>9:41</span>
+          <span>●●● 🔋</span>
+        </div>
+
+        {/* Edit button */}
+        <div style={{
+          position: 'absolute', top: 52, right: 16,
           background: 'rgba(0,0,0,0.35)',
           backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.2)',
@@ -59,9 +71,9 @@ export default function Profile() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '52px 24px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '52px 24px 80px' }}>
 
-        {/* Name & verified */}
+        {/* Name row */}
         <div style={{
           display: 'flex', alignItems: 'flex-start',
           justifyContent: 'space-between', marginBottom: 4
@@ -82,7 +94,8 @@ export default function Profile() {
             color: 'var(--char)', fontSize: 11,
             fontWeight: 700, padding: '4px 10px',
             borderRadius: 50, display: 'flex',
-            alignItems: 'center', gap: 4
+            alignItems: 'center', gap: 4,
+            boxShadow: '0 2px 8px rgba(212,175,55,0.35)'
           }}>
             🛡️ Verified
           </div>
@@ -90,7 +103,8 @@ export default function Profile() {
 
         {/* Stats */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 10, margin: '16px 0'
         }}>
           {[
@@ -121,7 +135,7 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Bio */}
+        {/* About */}
         <div style={{
           fontSize: 12, fontWeight: 700,
           letterSpacing: 2, textTransform: 'uppercase',
@@ -138,6 +152,25 @@ export default function Profile() {
           marginBottom: 16
         }}>
           "ቡና ወዳጅ፣ data ባለሙያ። Looking for a serious Habesha connection built on faith, family, and injera 😄"
+        </div>
+
+        {/* Details pills */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap',
+          gap: 8, marginBottom: 16
+        }}>
+          {['💍 Marriage-minded', '✝️ Orthodox', '📍 Washington DC', '🌍 Diaspora', '🇪🇹 Amhara'].map((pill) => (
+            <div key={pill} style={{
+              background: '#FFFBF0',
+              border: '1.5px solid var(--gold)',
+              borderRadius: 50, padding: '8px 14px',
+              fontSize: 12, fontWeight: 600,
+              color: 'var(--red)',
+              display: 'flex', alignItems: 'center', gap: 6
+            }}>
+              {pill}
+            </div>
+          ))}
         </div>
 
         {/* Boost banner */}
@@ -176,96 +209,110 @@ export default function Profile() {
           overflow: 'hidden',
           boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
         }}>
-          {[
-            {
-              icon: '🔔', label: 'Notifications',
-              right: (
-                <div
-                  onClick={() => setNotifications(!notifications)}
-                  style={{
-                    width: 44, height: 24, borderRadius: 12,
-                    background: notifications ? 'var(--green)' : 'var(--gray2)',
-                    position: 'relative', cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute', top: 3,
-                    left: notifications ? 23 : 3,
-                    width: 18, height: 18, borderRadius: '50%',
-                    background: 'white',
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
-                  }} />
-                </div>
-              )
-            },
-            {
-              icon: '👁️', label: 'Incognito Mode',
-              right: (
-                <div
-                  onClick={() => setIncognito(!incognito)}
-                  style={{
-                    width: 44, height: 24, borderRadius: 12,
-                    background: incognito ? 'var(--green)' : 'var(--gray2)',
-                    position: 'relative', cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute', top: 3,
-                    left: incognito ? 23 : 3,
-                    width: 18, height: 18, borderRadius: '50%',
-                    background: 'white',
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
-                  }} />
-                </div>
-              )
-            },
-            {
-              icon: '👑', label: 'Upgrade to Premium',
-              right: <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>,
-              action: () => router.push('/premium')
-            },
-            {
-              icon: '🛡️', label: 'Admin Dashboard',
-              right: <span style={{ fontSize: 14, color: 'var(--red)' }}>→</span>,
-              action: () => router.push('/admin')
-            },
-            {
-              icon: '🚪', label: 'Sign Out',
-              right: null,
-              action: () => router.push('/'),
-              red: true
-            },
-          ].map((item, i) => (
+          {/* Notifications toggle */}
+          <div className="sitem" style={{
+            display: 'flex', alignItems: 'center',
+            gap: 14, padding: '16px 18px',
+            borderBottom: '1px solid var(--gray)'
+          }}>
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>🔔</span>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Notifications</span>
             <div
-              key={i}
-              onClick={item.action}
+              onClick={() => setNotifications(!notifications)}
               style={{
-                display: 'flex', alignItems: 'center',
-                gap: 14, padding: '16px 18px',
-                cursor: item.action ? 'pointer' : 'default',
-                borderBottom: i < 4 ? '1px solid var(--gray)' : 'none',
+                width: 44, height: 24, borderRadius: 12,
+                background: notifications ? 'var(--green)' : 'var(--gray2)',
+                position: 'relative', cursor: 'pointer',
                 transition: 'background 0.2s'
               }}
             >
-              <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>
-                {item.icon}
-              </span>
-              <span style={{
-                flex: 1, fontSize: 14, fontWeight: 500,
-                color: item.red ? 'var(--red)' : 'var(--char)'
-              }}>
-                {item.label}
-              </span>
-              {item.right}
+              <div style={{
+                position: 'absolute', top: 3,
+                left: notifications ? 23 : 3,
+                width: 18, height: 18, borderRadius: '50%',
+                background: 'white', transition: 'left 0.2s',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+              }} />
             </div>
-          ))}
+          </div>
+
+          {/* Incognito toggle */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            gap: 14, padding: '16px 18px',
+            borderBottom: '1px solid var(--gray)'
+          }}>
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>👁️</span>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Incognito Mode</span>
+            <div
+              onClick={() => setIncognito(!incognito)}
+              style={{
+                width: 44, height: 24, borderRadius: 12,
+                background: incognito ? 'var(--green)' : 'var(--gray2)',
+                position: 'relative', cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: 3,
+                left: incognito ? 23 : 3,
+                width: 18, height: 18, borderRadius: '50%',
+                background: 'white', transition: 'left 0.2s',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+              }} />
+            </div>
+          </div>
+
+          {/* Premium */}
+          <div
+            onClick={() => router.push('/premium')}
+            style={{
+              display: 'flex', alignItems: 'center',
+              gap: 14, padding: '16px 18px',
+              borderBottom: '1px solid var(--gray)',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>👑</span>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Upgrade to Premium</span>
+            <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
+          </div>
+
+          {/* Admin */}
+          <div
+            onClick={() => router.push('/admin')}
+            style={{
+              display: 'flex', alignItems: 'center',
+              gap: 14, padding: '16px 18px',
+              borderBottom: '1px solid var(--gray)',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>🛡️</span>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Admin Dashboard</span>
+            <span style={{ fontSize: 14, color: 'var(--red)' }}>→</span>
+          </div>
+
+          {/* Sign out */}
+          <div
+            onClick={() => router.push('/')}
+            style={{
+              display: 'flex', alignItems: 'center',
+              gap: 14, padding: '16px 18px',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>🚪</span>
+            <span style={{
+              flex: 1, fontSize: 14, fontWeight: 500,
+              color: 'var(--red)'
+            }}>
+              Sign Out
+            </span>
+          </div>
         </div>
 
-        <div style={{ height: 90 }} />
+        <div style={{ height: 20 }} />
       </div>
 
       {/* Bottom nav */}
