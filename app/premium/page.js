@@ -9,6 +9,7 @@ const plans = [
     name: '✨ Standard',
     price: '$8',
     period: 'per month',
+    priceId: 'price_1TAanMPIJAEchGC2Zr2tIxWr',
     features: [
       { icon: '✓', color: '#4ADE80', text: 'Unlimited likes & matches' },
       { icon: '✓', color: '#4ADE80', text: 'See who liked you' },
@@ -25,6 +26,7 @@ const plans = [
     name: '🔥 Gold',
     price: '$15',
     period: 'per month',
+    priceId: 'price_1TAapNPIJAEchGC2ip3txrn0',
     popular: true,
     features: [
       { icon: '★', color: 'var(--gold)', text: 'Everything in Standard' },
@@ -43,6 +45,7 @@ const plans = [
     name: '🌿 Gold Annual',
     price: '$9',
     period: '/mo · billed yearly',
+    priceId: 'price_1TAarVPIJAEchGC2ZUn843Vh',
     save: '💚 Save 40%',
     features: [
       { icon: '✓', color: '#4ADE80', text: 'All Gold features included' },
@@ -58,6 +61,31 @@ const plans = [
 export default function Premium() {
   const router = useRouter()
   const [selected, setSelected] = useState('gold')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubscribe = async () => {
+    const plan = plans.find((p) => p.id === selected)
+    if (!plan) return
+    setLoading(true)
+    try {
+      const email = localStorage.getItem('fiqir_email') || ''
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: plan.priceId, email }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Something went wrong. Please try again.')
+      }
+    } catch (err) {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="phone-wrap" style={{
@@ -74,7 +102,6 @@ export default function Premium() {
         </span>
       </div>
 
-      {/* Header */}
       <div style={{ textAlign: 'center', padding: '60px 24px 16px', flexShrink: 0 }}>
         <style>{`
           @keyframes float {
@@ -105,7 +132,6 @@ export default function Premium() {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
 
-        {/* Plans */}
         {plans.map((plan) => (
           <div
             key={plan.id}
@@ -122,7 +148,6 @@ export default function Premium() {
               transform: selected === plan.id ? 'scale(1.02)' : 'scale(1)'
             }}
           >
-            {/* Popular badge */}
             {plan.popular && (
               <div style={{
                 position: 'absolute', top: -1, right: 20,
@@ -136,14 +161,11 @@ export default function Premium() {
               </div>
             )}
 
-            {/* Price row */}
             <div style={{
               display: 'flex', alignItems: 'center',
               justifyContent: 'space-between', marginBottom: 12
             }}>
-              <div style={{
-                fontSize: 16, fontWeight: 700, color: 'white'
-              }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'white' }}>
                 {plan.name}
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -168,7 +190,6 @@ export default function Premium() {
               </div>
             </div>
 
-            {/* Features */}
             {plan.features.map((f, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center',
@@ -190,8 +211,7 @@ export default function Premium() {
           background: 'linear-gradient(135deg, #1A1A0A, #2A2A10)',
           border: '2px solid rgba(212,175,55,0.4)',
           borderRadius: 20, padding: '18px 20px',
-          marginBottom: 20, cursor: 'pointer',
-          transition: 'all 0.2s'
+          marginBottom: 20, cursor: 'pointer'
         }}>
           <div style={{
             display: 'flex', alignItems: 'center',
@@ -199,23 +219,16 @@ export default function Premium() {
           }}>
             <span style={{ fontSize: 32 }}>👰</span>
             <div>
-              <div style={{
-                fontSize: 15, fontWeight: 700,
-                color: 'var(--gold)'
-              }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--gold)' }}>
                 Habesha Matchmaker
               </div>
-              <div style={{
-                fontSize: 12, color: 'rgba(255,255,255,0.45)',
-                marginTop: 2
-              }}>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>
                 Human-curated · $75/month
               </div>
             </div>
           </div>
           <div style={{
-            fontSize: 12, color: 'rgba(255,255,255,0.5)',
-            lineHeight: 1.6
+            fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6
           }}>
             A real Habesha matchmaking expert personally selects
             3 highly compatible matches per week just for you.
@@ -223,8 +236,13 @@ export default function Premium() {
         </div>
 
         {/* CTA */}
-        <button className="btn-gold">
-          Start 7-Day Free Trial 🎉
+        <button
+          className="btn-gold"
+          onClick={handleSubscribe}
+          disabled={loading}
+          style={{ opacity: loading ? 0.7 : 1 }}
+        >
+          {loading ? 'Loading...' : 'Start 7-Day Free Trial 🎉'}
         </button>
 
         <div style={{
@@ -241,3 +259,10 @@ export default function Premium() {
     </div>
   )
 }
+```
+
+Save both files then push to Vercel:
+```
+git add .
+git commit -m "Add Stripe checkout"
+git push
