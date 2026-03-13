@@ -28,7 +28,6 @@ export default function OTP() {
         textAlign: 'center'
       }}>
 
-        {/* Icon */}
         <div style={{
           width: 80, height: 80, borderRadius: 24,
           background: 'linear-gradient(135deg, var(--red), #A02020)',
@@ -40,7 +39,6 @@ export default function OTP() {
           ✉️
         </div>
 
-        {/* Title */}
         <div style={{
           fontFamily: 'Georgia, serif',
           fontSize: 26, fontWeight: 700,
@@ -49,7 +47,6 @@ export default function OTP() {
           Check your email
         </div>
 
-        {/* Subtitle */}
         <div style={{
           fontSize: 14, color: 'var(--gray2)',
           lineHeight: 1.7, marginBottom: 32
@@ -63,7 +60,6 @@ export default function OTP() {
           </span>
         </div>
 
-        {/* Instruction card */}
         <div style={{
           background: 'white', borderRadius: 20,
           padding: '20px 24px',
@@ -75,7 +71,7 @@ export default function OTP() {
             { num: '1', text: 'Open your email app' },
             { num: '2', text: 'Find the email from Fiqir' },
             { num: '3', text: 'Click the "Log In" button' },
-            { num: '4', text: 'You\'re in! 🎉' },
+            { num: '4', text: "You're in! 🎉" },
           ].map((step) => (
             <div key={step.num} style={{
               display: 'flex', alignItems: 'center',
@@ -102,7 +98,6 @@ export default function OTP() {
           ))}
         </div>
 
-        {/* Resend */}
         <div style={{
           fontSize: 13, color: 'var(--gray2)',
           marginBottom: 24
@@ -119,7 +114,6 @@ export default function OTP() {
           </span>
         </div>
 
-        {/* Back button */}
         <button
           onClick={() => router.push('/phone')}
           style={{
@@ -139,10 +133,3 @@ export default function OTP() {
     </div>
   )
 }
-```
-
-Now push to Vercel:
-```
-git add .
-git commit -m "Update OTP screen to magic link flow"
-git push

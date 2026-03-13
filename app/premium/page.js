@@ -206,7 +206,6 @@ export default function Premium() {
           </div>
         ))}
 
-        {/* Matchmaker card */}
         <div style={{
           background: 'linear-gradient(135deg, #1A1A0A, #2A2A10)',
           border: '2px solid rgba(212,175,55,0.4)',
@@ -235,7 +234,6 @@ export default function Premium() {
           </div>
         </div>
 
-        {/* CTA */}
         <button
           className="btn-gold"
           onClick={handleSubscribe}
@@ -260,9 +258,3 @@ export default function Premium() {
   )
 }
 ```
-
-Save both files then push to Vercel:
-```
-git add .
-git commit -m "Add Stripe checkout"
-git push
