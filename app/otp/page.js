@@ -1,38 +1,67 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import '../globals.css'
 
 export default function OTP() {
   const router = useRouter()
   const [digits, setDigits] = useState(['', '', '', '', '', ''])
-  const [timer, setTimer] = useState(59)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [email, setEmail] = useState('')
+  const [resent, setResent] = useState(false)
   const inputs = useRef([])
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((t) => (t > 0 ? t - 1 : 0))
-    }, 1000)
-    return () => clearInterval(interval)
+    const stored = localStorage.getItem('fiqir_email')
+    if (stored) setEmail(stored)
   }, [])
 
-  const handleChange = (value, index) => {
-    if (!/^\d*$/.test(value)) return
+  const handleChange = (i, val) => {
+    if (!/^\d*$/.test(val)) return
     const newDigits = [...digits]
-    newDigits[index] = value
+    newDigits[i] = val.slice(-1)
     setDigits(newDigits)
-    if (value && index < 5) {
-      inputs.current[index + 1].focus()
+    if (val && i < 5) inputs.current[i + 1]?.focus()
+    if (newDigits.every((d) => d !== '')) {
+      verifyCode(newDigits.join(''))
     }
   }
 
-  const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !digits[index] && index > 0) {
-      inputs.current[index - 1].focus()
+  const handleKeyDown = (i, e) => {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) {
+      inputs.current[i - 1]?.focus()
     }
   }
 
-  const isComplete = digits.every((d) => d !== '')
+  const verifyCode = async (code) => {
+    if (!email) { setError('Email not found. Go back and try again.'); return }
+    setLoading(true)
+    setError('')
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email'
+      })
+      if (error) throw error
+      router.push('/profile-build')
+    } catch (err) {
+      setError('Invalid code. Please try again.')
+      setDigits(['', '', '', '', '', ''])
+      inputs.current[0]?.focus()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resendCode = async () => {
+    if (!email) return
+    await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
+    setResent(true)
+    setTimeout(() => setResent(false), 3000)
+  }
 
   return (
     <div className="phone-wrap">
@@ -41,129 +70,114 @@ export default function OTP() {
         <span>●●● 🔋</span>
       </div>
 
-      <div className="screen" style={{ paddingTop: 80 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 32px' }}>
 
         {/* Back */}
         <div
           onClick={() => router.push('/phone')}
           style={{
-            width: 40, height: 40, borderRadius: '50%',
-            border: '2px solid var(--cream2)',
-            background: 'white', cursor: 'pointer',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 16,
-            color: 'var(--char2)', marginBottom: 28
+            marginTop: 52, marginBottom: 32,
+            fontSize: 22, cursor: 'pointer',
+            color: 'var(--red)', width: 36
           }}
         >
           ←
         </div>
 
-        {/* Step */}
-        <div style={{
-          fontSize: 11, color: 'var(--gray2)',
-          letterSpacing: 2, textTransform: 'uppercase',
-          fontWeight: 600, marginBottom: 20
-        }}>
-          Step 1 of 4 — OTP
-        </div>
-
         {/* Icon */}
         <div style={{
-          width: 72, height: 72, borderRadius: 24,
-          background: 'linear-gradient(135deg, #F0FFF4, #C6F6D5)',
+          width: 64, height: 64, borderRadius: 20,
+          background: 'linear-gradient(135deg, var(--red), #A02020)',
           display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: 36,
-          marginBottom: 20
+          justifyContent: 'center', fontSize: 28,
+          marginBottom: 24,
+          boxShadow: '0 8px 24px rgba(139,26,26,0.25)'
         }}>
-          ✉️
+          🔐
         </div>
 
         {/* Title */}
         <div style={{
-          fontFamily: 'Georgia, serif', fontSize: 26,
-          color: 'var(--char)', marginBottom: 6
+          fontFamily: 'Georgia, serif',
+          fontSize: 26, fontWeight: 700,
+          color: 'var(--char)', marginBottom: 8
         }}>
-          Check your<br />
-          <span style={{ color: 'var(--red)' }}>messages</span>
+          Check your email
         </div>
-
         <div style={{
-          fontSize: 14, color: 'var(--gray2)', marginBottom: 8
+          fontSize: 14, color: 'var(--gray2)',
+          lineHeight: 1.6, marginBottom: 32
         }}>
-          6-digit code sent to your phone
+          We sent a 6-digit code to{' '}
+          <span style={{ color: 'var(--red)', fontWeight: 600 }}>
+            {email || 'your email'}
+          </span>
         </div>
 
         {/* OTP boxes */}
         <div style={{
-          display: 'flex', gap: 12,
-          margin: '28px 0', justifyContent: 'center'
+          display: 'flex', gap: 10,
+          justifyContent: 'center', marginBottom: 16
         }}>
-          {digits.map((digit, i) => (
+          {digits.map((d, i) => (
             <input
               key={i}
               ref={(el) => (inputs.current[i] = el)}
-              type="tel"
+              value={d}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
               maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(e.target.value, i)}
-              onKeyDown={(e) => handleKeyDown(e, i)}
+              inputMode="numeric"
               style={{
-                width: 52, height: 60,
-                background: digit ? 'rgba(45,106,79,0.05)' : 'var(--gray)',
-                border: `2px solid ${digit ? 'var(--green)' : 'var(--cream2)'}`,
-                borderRadius: 14,
-                textAlign: 'center',
+                width: 46, height: 56,
+                borderRadius: 14, textAlign: 'center',
                 fontSize: 24, fontWeight: 700,
-                fontFamily: 'Georgia, serif',
-                color: 'var(--red)', outline: 'none',
-                transition: 'all 0.2s'
+                border: `2px solid ${d ? 'var(--red)' : 'var(--cream2)'}`,
+                background: d ? '#FFF5F5' : 'white',
+                color: 'var(--char)', outline: 'none',
+                fontFamily: 'inherit',
+                transition: 'all 0.15s',
+                boxShadow: d ? '0 2px 8px rgba(139,26,26,0.12)' : 'none'
               }}
             />
           ))}
         </div>
 
-        {/* Timer */}
-        <div style={{
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'center', gap: 8, marginBottom: 32
-        }}>
-          <span style={{ fontSize: 13, color: 'var(--gray2)' }}>
-            Didn't receive it?
-          </span>
-          <span style={{
+        {/* Error */}
+        {error && (
+          <div style={{
             fontSize: 13, color: 'var(--red)',
-            fontWeight: 600, cursor: 'pointer',
-            textDecoration: 'underline'
+            textAlign: 'center', marginBottom: 12
           }}>
-            Resend
-          </span>
-          <span style={{
-            fontSize: 13, color: 'var(--gold)', fontWeight: 700
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div style={{
+            fontSize: 13, color: 'var(--gray2)',
+            textAlign: 'center', marginBottom: 12
           }}>
-            0:{String(timer).padStart(2, '0')}
-          </span>
-        </div>
+            Verifying...
+          </div>
+        )}
 
-        <div style={{ flex: 1 }} />
-
-        {/* Button */}
-        <button
-          className="btn-red"
-          disabled={!isComplete}
-          onClick={() => router.push('/profile-build')}
-          style={{
-            opacity: isComplete ? 1 : 0.5,
-            cursor: isComplete ? 'pointer' : 'not-allowed'
-          }}
-        >
-          Verify & Continue
-        </button>
-
+        {/* Resend */}
         <div style={{
-          textAlign: 'center', marginTop: 12,
-          fontSize: 12, color: 'var(--gray2)'
+          textAlign: 'center', fontSize: 13,
+          color: 'var(--gray2)', marginTop: 8
         }}>
-          Demo: enter any 6 digits to continue
+          Didn't get it?{' '}
+          <span
+            onClick={resendCode}
+            style={{
+              color: resent ? 'var(--green)' : 'var(--red)',
+              fontWeight: 600, cursor: 'pointer'
+            }}
+          >
+            {resent ? '✓ Code sent!' : 'Resend code'}
+          </span>
         </div>
 
       </div>
